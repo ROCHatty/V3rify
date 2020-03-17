@@ -1,0 +1,183 @@
+<!doctype HTML>
+<html>
+<head>
+    <title>V3rmillion share & verification system</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <style>
+        html {
+            height: 100%;
+        }
+
+        body {
+            min-height: 100%;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            padding-top: 20% !important;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        a {
+            border-color: #fff !important;
+            border-width: 3px !important;
+            border-style: solid !important;
+            background-color: transparent !important;
+            color: #fff !important;
+            font-size: 20px !important;
+            margin: 5px !important;
+        }
+
+        h1 {
+            color: #fff;
+        }
+
+        a:hover {
+            background-color: #fff !important;
+            transition: .5s !important;
+            color: #000 !important;
+        }
+        #recaptcha > div {
+            width: auto !important;
+            margin-bottom: .5em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <center>
+            <h1>V3rmillion share & verification system</h1>
+            <a onclick="createshare();" class="btn btn-lg btn-block">Share something</a>
+        </center>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+    <script>
+        function createshare() {
+            var data = {}
+            Swal.fire({
+                text: 'Message to share',
+                input: 'text',
+                showCancelButton: false,
+                confirmButtonText: 'Go to settings',
+                preConfirm: (message) => {
+                    data['message'] = message
+                }
+            }).then(() => {
+                console.log(data);
+                if (data['message'].length > 200) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Your post can only have a maximum of 200 characters'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Minimum account age',
+                        text: 'Please insert minimum account age in days (0 = no check)',
+                        input: 'number',
+                        showCancelButton: false,
+                        confirmButtonText: 'Next',
+                        preConfirm: (days) => {
+                            data['days'] = days
+                        }
+                    }).then(() => {
+                        console.log(data);
+                        Swal.fire({
+                            title: 'Minimum posts amount',
+                            text: 'Please insert the minimum amount of posts the user needs to access this post (0 = no check)',
+                            input: 'number',
+                            showCancelButton: false,
+                            confirmButtonText: 'Next',
+                            preConfirm: (posts) => {
+                                data['posts'] = posts
+                            }
+                        }).then(() => {
+                            console.log(data);
+                            Swal.fire({
+                                title: 'Minimum threads amount',
+                                text: 'Please insert the minimum amount of threads the user needs to access this post (0 = no check)',
+                                input: 'number',
+                                showCancelButton: false,
+                                confirmButtonText: 'Next',
+                                preConfirm: (threads) => {
+                                    data['threads'] = threads
+                                }
+                            }).then(() => {
+                                console.log(data);
+                                Swal.fire({
+                                    title: 'Minimum reputation',
+                                    text: 'Please insert the minimum amount of reputation the user needs to access this post (0 = no check)',
+                                    input: 'number',
+                                    showCancelButton: false,
+                                    confirmButtonText: 'Next',
+                                    preConfirm: (reputation) => {
+                                        data['reputation'] = reputation;
+                                    },
+                                    allowOutsideClick: () => !Swal.isLoading()
+                                }).then(() => {
+                                    Swal.fire({
+                                        title: 'Please verify that youre a human!',
+                                        html: '<div id="recaptcha"></div>',
+                                        onOpen: function () {
+                                            grecaptcha.render('recaptcha', {
+                                                'sitekey': '6LduYeEUAAAAAB6g5s9UsjtfuwPb-1FVjM4X2Aqc'
+                                            });
+                                        },
+                                        preConfirm: function () {
+                                            if (grecaptcha.getResponse().length === 0) {
+                                                swal.showValidationMessage(`Please verify that you're not a robot`)
+                                            } else {
+                                                data['captcha'] = grecaptcha.getResponse()
+                                                return fetch('/api/new', {
+                                                    method: 'POST',
+                                                    body: JSON.stringify(data)
+                                                }).then(response => {
+                                                    if (!response.ok) {
+                                                        throw new Error(response.statusText)
+                                                    }
+                                                    return response.json()
+                                                }).catch(error => {
+                                                    Swal.showValidationMessage(`Request failed: ${error}`)
+                                                });
+                                            }
+                                        }
+                                    }).then((result) => {
+                                        console.log(result)
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Post created successfully!',
+                                            text: 'Link: {{ currentlink }}/view/'+result.value.id.toString()
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
