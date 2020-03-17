@@ -19,7 +19,7 @@ scraper = cloudscraper.create_scraper(allow_brotli=False)
 sitedata = []
 savefile = 'V3rmillionDab/info.json'
 currentlink = 'http://localhost:8080'
-secretkey = '6LduYeEUAAAAAGSY71aBZb158Q6T7NEMSm9F8rbq'
+secretkey = 'GONEEE'
 
 def savedata():
     global sitedata
@@ -50,7 +50,7 @@ def getprofile(id):
     dab = scraper.get("https://v3rmillion.net/member.php?action=profile&uid="+str(id)).text
     if "You are either not logged in or do not have permission to view this page" in dab:
         # Not logged in
-        dab = scraper.post("https://v3rmillion.net/member.php", data = {"action": "do_login", "url": "/member.php?action=profile&uid="+str(id), "username": "hattorius", "password": "22Augustus2002!", "code": "", "remember": "yes", "_challenge": ""}).text
+        dab = scraper.post("https://v3rmillion.net/member.php", data = {"action": "do_login", "url": "/member.php?action=profile&uid="+str(id), "username": "", "password": "", "code": "", "remember": "yes", "_challenge": ""}).text
     dab = scraper.get("https://v3rmillion.net/member.php?action=profile&uid="+str(id)).text
     tree = html.fromstring(dab)
     joined = dab.split('Joined:</strong></td>')[1].split('>')[1].split('<')[0]
